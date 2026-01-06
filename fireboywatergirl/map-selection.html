@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireboy vs Watergirl - Map Selection</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MedievalSharp', cursive;
+            background: #1a0f0a;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        /* Dungeon wall background */
+        .dungeon-map-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at center, rgba(139, 69, 19, 0.3) 0%, rgba(0, 0, 0, 0.9) 70%),
+                repeating-linear-gradient(
+                    90deg,
+                    #2a1810 0px,
+                    #3a2420 40px,
+                    #2a1810 80px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    #2a1810 0px,
+                    #3a2420 40px,
+                    #2a1810 80px
+                );
+        }
+
+        /* Map container */
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Canvas for drawing paths - REMOVED */
+
+        /* Level nodes container */
+        .levels-grid {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            z-index: 10;
+        }
+
+        /* Level node */
+        .level-node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+        }
+
+        .level-node:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+        }
+
+        .level-gem {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: gemFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes gemFloat {
+            0%, 100% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-10px) rotateY(180deg); }
+        }
+
+        /* Gem shapes */
+        .gem-diamond {
+            background: linear-gradient(135deg, #00ff00, #40ff40, #00cc00);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .gem-hexagon {
+            background: linear-gradient(135deg, #00ff00, #40ff40, #00cc00);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .gem-triangle {
+            background: linear-gradient(135deg, #00ff00, #40ff40, #00cc00);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Locked levels */
+        .level-node.locked .level-gem {
+            background: linear-gradient(135deg, #666, #888, #666);
+            filter: grayscale(100%);
+            animation: none;
+            position: relative;
+        }
+
+        .level-node.locked .level-gem::after {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            z-index: 3;
+        }
+
+        .level-node.locked {
+            cursor: not-allowed;
+            filter: drop-shadow(0 0 5px rgba(100, 100, 100, 0.3));
+        }
+
+        .level-node.locked:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 10px rgba(100, 100, 100, 0.5));
+        }
+
+        /* Completed levels */
+        .level-node.completed .level-gem {
+            background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+            box-shadow: 
+                0 0 40px rgba(255, 215, 0, 0.8),
+                inset 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Current level highlight */
+        .level-node.current .level-gem {
+            animation: currentPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes currentPulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: scale(1.2);
+                filter: brightness(1.5);
+            }
+        }
+
+        /* Level number */
+        .level-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 2;
+        }
+
+        /* Level info popup */
+        .level-info {
+            position: absolute;
+            bottom: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #d4af37;
+            padding: 15px 20px;
+            border-radius: 10px;
+            min-width: 200px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 20;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .level-node:hover .level-info {
+            opacity: 1;
+        }
+
+        .level-name {
+            color: #d4af37;
+            font-size: 16px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .level-description {
+            color: #8B7355;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .level-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .level-difficulty {
+            color: #ff6b35;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .level-mode {
+            color: #4a90e2;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .level-stars {
+            color: #ffd700;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* UI Header */
+        .map-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 3px solid #d4af37;
+        }
+
+        .map-title {
+            font-size: 2em;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #2c1810, #4a2818);
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            font-family: 'MedievalSharp', cursive;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #4a2818, #6a3828);
+            transform: translateY(-2px);
+        }
+
+        /* Player progress */
+        .player-progress {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #d4af37;
+            padding: 15px 30px;
+            border-radius: 10px;
+            z-index: 100;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #d4af37;
+        }
+
+        .progress-icon {
+            font-size: 24px;
+        }
+
+        .progress-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="dungeon-map-bg"></div>
+    
+    <div class="map-header">
+        <button class="back-btn" onclick="goBack()">← Back to Menu</button>
+        <h1 class="map-title">SELECT YOUR BATTLE</h1>
+        <div></div>
+    </div>
+    
+    <div class="map-container">
+        <div class="levels-grid" id="levelsGrid"></div>
+    </div>
+    
+    <div class="player-progress">
+        <div class="progress-item">
+            <span class="progress-icon">⭐</span>
+            <span class="progress-value" id="totalStars">0/15</span>
+        </div>
+        <div class="progress-item">
+            <span class="progress-icon">🏆</span>
+            <span class="progress-value" id="levelsCompleted">0/5</span>
+        </div>
+        <div class="progress-item">
+            <span class="progress-icon">💎</span>
+            <span class="progress-value" id="gemsCollected">0</span>
+        </div>
+    </div>
+    
+    <script src="settings.js"></script>
+    <script>
+        // Level data
+        const levels = [
+            { 
+                id: 1, 
+                name: "Tutorial Arena", 
+                description: "Learn the basics of combat and movement",
+                x: 150, 
+                y: 450, 
+                stars: 0, 
+                unlocked: true, 
+                shape: 'diamond',
+                difficulty: "Easy",
+                mode: "Tutorial"
+            },
+            { 
+                id: 2, 
+                name: "Competitive Battle", 
+                description: "Face off in intense 1v1 combat",
+                x: 300, 
+                y: 350, 
+                stars: 0, 
+                unlocked: false, 
+                shape: 'hexagon',
+                difficulty: "Medium",
+                mode: "Competitive"
+            },
+            { 
+                id: 3, 
+                name: "Cooperative Puzzle", 
+                description: "Work together to solve challenges",
+                x: 450, 
+                y: 250, 
+                stars: 0, 
+                unlocked: false, 
+                shape: 'diamond',
+                difficulty: "Medium",
+                mode: "Cooperative"
+            },
+            { 
+                id: 4, 
+                name: "Boss Chamber", 
+                description: "Face the ultimate challenge",
+                x: 600, 
+                y: 350, 
+                stars: 0, 
+                unlocked: false, 
+                shape: 'triangle',
+                difficulty: "Hard",
+                mode: "Boss Battle"
+            },
+            { 
+                id: 5, 
+                name: "Final Showdown", 
+                description: "The ultimate test of skill",
+                x: 750, 
+                y: 450, 
+                stars: 0, 
+                unlocked: false, 
+                shape: 'hexagon',
+                difficulty: "Expert",
+                mode: "Final Battle"
+            }
+        ];
+        
+        // Path connections removed - no connecting lines
+        
+        // Load progress from localStorage
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('levelProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                levels.forEach((level, index) => {
+                    if (progress[index]) {
+                        level.stars = progress[index].stars || 0;
+                        level.unlocked = progress[index].unlocked || false;
+                    }
+                });
+            }
+            
+            // Tutorial is always unlocked
+            levels[0].unlocked = true;
+        }
+        
+        // Save progress
+        function saveProgress() {
+            const progress = {};
+            levels.forEach((level, index) => {
+                progress[index] = {
+                    stars: level.stars,
+                    unlocked: level.unlocked
+                };
+            });
+            localStorage.setItem('levelProgress', JSON.stringify(progress));
+        }
+        
+        // Path drawing function removed - no connecting lines
+        
+        // Create level nodes
+        function createLevelNodes() {
+            const grid = document.getElementById('levelsGrid');
+            grid.innerHTML = '';
+            
+            levels.forEach((level, index) => {
+                const node = document.createElement('div');
+                node.className = 'level-node';
+                node.style.left = level.x + 'px';
+                node.style.top = level.y + 'px';
+                
+                if (!level.unlocked) {
+                    node.classList.add('locked');
+                } else if (level.stars > 0) {
+                    node.classList.add('completed');
+                } else if (index === getCurrentLevel()) {
+                    node.classList.add('current');
+                }
+                
+                const gem = document.createElement('div');
+                gem.className = `level-gem gem-${level.shape}`;
+                
+                const number = document.createElement('div');
+                number.className = 'level-number';
+                number.textContent = level.id;
+                
+                const info = document.createElement('div');
+                info.className = 'level-info';
+                info.innerHTML = `
+                    <div class="level-name">${level.name}</div>
+                    <div class="level-description">${level.description}</div>
+                    <div class="level-details">
+                        <span class="level-difficulty">${level.difficulty}</span>
+                        <span class="level-mode">${level.mode}</span>
+                    </div>
+                    <div class="level-stars">${'⭐'.repeat(level.stars) || 'Not completed'}</div>
+                `;
+                
+                gem.appendChild(number);
+                node.appendChild(gem);
+                node.appendChild(info);
+                
+                if (level.unlocked) {
+                    node.onclick = () => selectLevel(level.id);
+                }
+                
+                grid.appendChild(node);
+            });
+            
+            updateProgress();
+        }
+        
+        // Get current level (first uncompleted level)
+        function getCurrentLevel() {
+            for (let i = 0; i < levels.length; i++) {
+                if (levels[i].unlocked && levels[i].stars === 0) {
+                    return i;
+                }
+            }
+            return levels.length - 1;
+        }
+        
+        // Update progress display
+        function updateProgress() {
+            const totalStars = levels.reduce((sum, level) => sum + level.stars, 0);
+            const maxStars = levels.length * 3;
+            const completed = levels.filter(l => l.stars > 0).length;
+            
+            document.getElementById('totalStars').textContent = `${totalStars}/${maxStars}`;
+            document.getElementById('levelsCompleted').textContent = `${completed}/${levels.length}`;
+            document.getElementById('gemsCollected').textContent = totalStars * 10; // Example gem calculation
+        }
+        
+        // Select a level
+        function selectLevel(levelId) {
+            const level = levels.find(l => l.id === levelId);
+            if (level && level.unlocked) {
+                // Show confirmation dialog
+                const confirmMessage = `Start ${level.name}?\n\n${level.description}\n\nDifficulty: ${level.difficulty}\nMode: ${level.mode}`;
+                
+                if (confirm(confirmMessage)) {
+                    // Different HTML files for different levels
+                    const levelFiles = {
+                        1: 'index.html',           // Tutorial
+                        2: 'level2.html',          // Competitive
+                        3: 'level3.html',          // Cooperative
+                        4: 'level4.html',          // Boss
+                        5: 'level5.html'           // Final
+                    };
+                    
+                    window.location.href = levelFiles[levelId] || 'index.html';
+                }
+            } else if (!level.unlocked) {
+                alert(`Level ${levelId} is locked!\nComplete the previous level to unlock it.`);
+            }
+        }
+        
+        // Go back to main menu
+        function goBack() {
+            window.location.href = 'main-menu.html';
+        }
+        
+        // Unlock next level (call this when a level is completed)
+        window.unlockNextLevel = function(currentLevelId, stars = 1) {
+            const currentIndex = levels.findIndex(l => l.id === currentLevelId);
+            if (currentIndex !== -1) {
+                levels[currentIndex].stars = Math.max(levels[currentIndex].stars, stars);
+                if (currentIndex < levels.length - 1) {
+                    levels[currentIndex + 1].unlocked = true;
+                }
+                saveProgress();
+                createLevelNodes();
+            }
+        };
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            loadProgress();
+            createLevelNodes();
+        });
+    </script>
+</body>
+</html>

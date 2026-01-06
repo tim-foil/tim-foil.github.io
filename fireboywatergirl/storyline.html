@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireboy vs Watergirl - Storyline</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MedievalSharp', cursive;
+            background: #0a0a0a;
+            color: #d4af37;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Animated dungeon background */
+        .dungeon-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)),
+                repeating-linear-gradient(
+                    90deg,
+                    #1a1a1a 0px,
+                    #2a2a2a 20px,
+                    #1a1a1a 40px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    #1a1a1a 0px,
+                    #2a2a2a 20px,
+                    #1a1a1a 40px
+                );
+            animation: dungeonPulse 10s ease-in-out infinite;
+        }
+
+        @keyframes dungeonPulse {
+            0%, 100% { filter: brightness(0.8); }
+            50% { filter: brightness(1.2); }
+        }
+
+        /* Torch effects */
+        .torch {
+            position: absolute;
+            width: 60px;
+            height: 120px;
+        }
+
+        .torch-left {
+            top: 20%;
+            left: 5%;
+        }
+
+        .torch-right {
+            top: 20%;
+            right: 5%;
+        }
+
+        .flame {
+            width: 40px;
+            height: 60px;
+            margin: 0 auto;
+            background: radial-gradient(ellipse at bottom, #ff6b35, #ff8c42, transparent);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 1.5s ease-in-out infinite;
+            filter: blur(2px);
+            box-shadow: 0 0 40px #ff6b35, 0 0 80px #ff8c42;
+        }
+
+        @keyframes flicker {
+            0%, 100% { 
+                transform: scale(1) rotate(-2deg); 
+                filter: blur(2px) brightness(1);
+            }
+            25% { 
+                transform: scale(1.1) rotate(2deg); 
+                filter: blur(1px) brightness(1.3);
+            }
+            50% { 
+                transform: scale(0.95) rotate(-1deg); 
+                filter: blur(3px) brightness(0.9);
+            }
+            75% { 
+                transform: scale(1.05) rotate(1deg); 
+                filter: blur(2px) brightness(1.1);
+            }
+        }
+
+        .torch-holder {
+            width: 30px;
+            height: 60px;
+            background: linear-gradient(#654321, #8B4513);
+            margin: 0 auto;
+            border: 2px solid #4a3020;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            animation: fadeIn 2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .title {
+            font-size: 3.5em;
+            background: linear-gradient(45deg, #ff6b35, #4a90e2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 107, 53, 0.5), 0 0 60px rgba(74, 144, 226, 0.5);
+            animation: titleGlow 3s ease-in-out infinite;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            color: #8B7355;
+            letter-spacing: 5px;
+        }
+
+        .story-content {
+            background: linear-gradient(135deg, rgba(44, 24, 16, 0.9), rgba(74, 40, 24, 0.9));
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 
+                inset 0 0 30px rgba(0,0,0,0.5),
+                0 10px 30px rgba(0,0,0,0.8);
+            line-height: 1.8;
+        }
+
+        .story-section {
+            margin-bottom: 30px;
+        }
+
+        .story-section h2 {
+            color: #ff6b35;
+            font-size: 2em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+        }
+
+        .story-section h3 {
+            color: #4a90e2;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            margin-top: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .story-section p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .character-highlight {
+            color: #d4af37;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .fireboy-text {
+            color: #ff6b35;
+            font-weight: bold;
+        }
+
+        .watergirl-text {
+            color: #4a90e2;
+            font-weight: bold;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #2c1810, #4a2818);
+            border: 3px solid #d4af37;
+            color: #d4af37;
+            padding: 15px 30px;
+            font-size: 1.3em;
+            font-family: 'MedievalSharp', cursive;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                inset 0 0 20px rgba(0,0,0,0.5),
+                0 5px 15px rgba(0,0,0,0.8);
+            display: block;
+            margin: 0 auto;
+            width: 200px;
+            text-align: center;
+        }
+
+        .back-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .back-button:hover::before {
+            left: 100%;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #4a2818, #6a3828);
+            transform: translateY(-2px);
+            box-shadow: 
+                inset 0 0 30px rgba(212, 175, 55, 0.2),
+                0 8px 20px rgba(0,0,0,0.9);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        /* Particle effects */
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #d4af37;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: float-up 4s linear infinite;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dungeon-bg"></div>
+    
+    <!-- Torches -->
+    <div class="torch torch-left">
+        <div class="flame"></div>
+        <div class="torch-holder"></div>
+    </div>
+    <div class="torch torch-right">
+        <div class="flame"></div>
+        <div class="torch-holder"></div>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">THE LEGEND</h1>
+            <p class="subtitle">FIREBOY vs WATERGIRL</p>
+        </div>
+        
+        <div class="story-content">
+            <div class="story-section">
+                <h2>🌋 The Ancient Conflict</h2>
+                <p>
+                    In the mystical realm of <span class="character-highlight">Elemental Dungeons</span>, two ancient forces have been locked in eternal conflict. 
+                    <span class="fireboy-text">Fireboy</span>, the embodiment of raw flame and passion, wields the power of molten lava and scorching heat. 
+                    <span class="watergirl-text">Watergirl</span>, the spirit of flowing water and ice, commands the forces of liquid and frost.
+                </p>
+                <p>
+                    For centuries, these elemental warriors have battled across the treacherous dungeons, each seeking to prove their elemental supremacy. 
+                    Their eternal rivalry has shaped the very landscape of their world, creating dangerous platforms, mysterious doors, and powerful artifacts.
+                </p>
+            </div>
+
+            <div class="story-section">
+                <h2>⚔️ The Battle Arena</h2>
+                <p>
+                    The <span class="character-highlight">Dungeon Battles</span> take place in ancient arenas where the very walls pulse with elemental energy. 
+                    These mystical chambers are filled with:
+                </p>
+                <h3>🔥 Fireboy's Arsenal</h3>
+                <p>
+                    • <strong>Fireball Projectiles:</strong> Scorching spheres of pure flame that burn through anything in their path<br>
+                    • <strong>Defense Barriers:</strong> Walls of molten rock that can block incoming attacks<br>
+                    • <strong>Ultimate Inferno:</strong> A devastating blast of fire that engulfs the entire arena
+                </p>
+                <h3>💧 Watergirl's Powers</h3>
+                <p>
+                    • <strong>Waterball Projectiles:</strong> Freezing spheres that can slow and damage opponents<br>
+                    • <strong>Ice Barriers:</strong> Crystalline walls that deflect enemy attacks<br>
+                    • <strong>Ultimate Tsunami:</strong> A massive wave of water that sweeps across the battlefield
+                </p>
+            </div>
+
+            <div class="story-section">
+                <h2>🚪 The Mystical Doors</h2>
+                <p>
+                    Throughout the dungeons, <span class="character-highlight">Mystical Doors</span> appear at random intervals, pulsing with ancient magic. 
+                    These doors are the ultimate prize - whoever reaches them first gains access to the next level of the elemental realm.
+                </p>
+                <p>
+                    But beware! The doors are not easily obtained. They require skill, strategy, and the ability to defend against your opponent's relentless attacks. 
+                    Only by mastering both offense and defense can a warrior hope to claim victory.
+                </p>
+            </div>
+
+            <div class="story-section">
+                <h2>🛡️ The Defense System</h2>
+                <p>
+                    In their eternal struggle, both warriors have developed <span class="character-highlight">Defense Barriers</span> - temporary shields that can block incoming projectiles. 
+                    These barriers are not just defensive tools; they are the key to unlocking ultimate power.
+                </p>
+                <p>
+                    Each successful defense builds up the warrior's elemental energy. After blocking five enemy attacks, the warrior becomes charged with enough power to unleash their <span class="character-highlight">Ultimate Attack</span> - 
+                    a devastating elemental assault that can turn the tide of battle in an instant.
+                </p>
+            </div>
+
+            <div class="story-section">
+                <h2>🏆 The Eternal Quest</h2>
+                <p>
+                    The battle between <span class="fireboy-text">Fireboy</span> and <span class="watergirl-text">Watergirl</span> is more than just a fight for supremacy. 
+                    It is a test of skill, strategy, and elemental mastery. Each victory brings them closer to understanding the true nature of their powers.
+                </p>
+                <p>
+                    Will you help <span class="fireboy-text">Fireboy</span> prove that fire conquers all? Or will you aid <span class="watergirl-text">Watergirl</span> in demonstrating that water can extinguish any flame? 
+                    The choice is yours, and the fate of the elemental realm hangs in the balance!
+                </p>
+            </div>
+        </div>
+        
+        <button class="back-button" onclick="goBack()">Return to Menu</button>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.animationDelay = Math.random() * 4 + 's';
+            particle.style.animationDuration = (4 + Math.random() * 2) + 's';
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 6000);
+        }
+        
+        // Create particles periodically
+        setInterval(createParticle, 300);
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

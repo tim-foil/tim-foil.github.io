@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fireboy vs Watergirl - Level 3: Battle Arena</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Main Menu Styles */
+      @import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
+
+      .screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .screen.hidden {
+        display: none;
+      }
+
+      #mainMenu {
+        font-family: "MedievalSharp", cursive;
+        background: #0a0a0a;
+        color: #d4af37;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Animated dungeon background */
+      .dungeon-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)),
+          repeating-linear-gradient(
+            90deg,
+            #1a1a1a 0px,
+            #2a2a2a 20px,
+            #1a1a1a 40px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            #1a1a1a 0px,
+            #2a2a2a 20px,
+            #1a1a1a 40px
+          );
+        animation: dungeonPulse 10s ease-in-out infinite;
+      }
+
+      @keyframes dungeonPulse {
+        0%,
+        100% {
+          filter: brightness(0.8);
+        }
+        50% {
+          filter: brightness(1.2);
+        }
+      }
+
+      /* Torch effects */
+      .torch {
+        position: absolute;
+        width: 60px;
+        height: 120px;
+      }
+
+      .torch-left {
+        top: 20%;
+        left: 5%;
+      }
+
+      .torch-right {
+        top: 20%;
+        right: 5%;
+      }
+
+      .flame {
+        width: 40px;
+        height: 60px;
+        margin: 0 auto;
+        background: radial-gradient(
+          ellipse at bottom,
+          #ff6b35,
+          #ff8c42,
+          transparent
+        );
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        animation: flicker 1.5s ease-in-out infinite;
+        filter: blur(2px);
+        box-shadow: 0 0 40px #ff6b35, 0 0 80px #ff8c42;
+      }
+
+      @keyframes flicker {
+        0%,
+        100% {
+          transform: scale(1) rotate(-2deg);
+          opacity: 0.8;
+        }
+        25% {
+          transform: scale(1.1) rotate(1deg);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(0.9) rotate(-1deg);
+          opacity: 0.9;
+        }
+        75% {
+          transform: scale(1.05) rotate(0.5deg);
+          opacity: 0.95;
+        }
+      }
+
+      .torch-holder {
+        width: 20px;
+        height: 40px;
+        background: linear-gradient(135deg, #8b4513, #654321);
+        margin: 0 auto;
+        border-radius: 0 0 10px 10px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Main container */
+      .main-container {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+      }
+
+      .game-title {
+        margin-bottom: 60px;
+        animation: titleGlow 3s ease-in-out infinite;
+      }
+
+      @keyframes titleGlow {
+        0%,
+        100% {
+          text-shadow: 0 0 20px #d4af37, 0 0 40px #d4af37;
+        }
+        50% {
+          text-shadow: 0 0 30px #ffd700, 0 0 60px #ffd700, 0 0 80px #ffd700;
+        }
+      }
+
+      .title-main {
+        font-size: 4.5em;
+        margin: 0;
+        color: #d4af37;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        letter-spacing: 3px;
+        animation: titlePulse 2s ease-in-out infinite;
+      }
+
+      @keyframes titlePulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .title-sub {
+        font-size: 1.8em;
+        margin: 10px 0 0 0;
+        color: #8b7355;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        letter-spacing: 2px;
+      }
+
+      .menu-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+
+      .menu-btn {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 3px solid #d4af37;
+        color: #d4af37;
+        padding: 15px 40px;
+        font-size: 1.4em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        overflow: hidden;
+        min-width: 280px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .menu-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(212, 175, 55, 0.3),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .menu-btn:hover::before {
+        left: 100%;
+      }
+
+      .menu-btn:hover {
+        background: linear-gradient(135deg, #4a2818, #6a3828);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+      }
+
+      .menu-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .bottom-buttons {
+        display: flex;
+        gap: 20px;
+      }
+
+      .small-btn {
+        background: linear-gradient(135deg, #1a0f0a, #2a1810);
+        border: 2px solid #8b7355;
+        color: #8b7355;
+        padding: 8px 20px;
+        font-size: 1em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .small-btn:hover {
+        background: linear-gradient(135deg, #2a1810, #3a2420);
+        color: #d4af37;
+        border-color: #d4af37;
+        transform: translateY(-2px);
+      }
+
+      /* Character animations */
+      .characters {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 200px;
+        z-index: 5;
+      }
+
+      .character {
+        position: absolute;
+        width: 80px;
+        height: 120px;
+        bottom: 0;
+        animation: characterFloat 4s ease-in-out infinite;
+      }
+
+      .fireboy {
+        left: 15%;
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        box-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+      }
+
+      .watergirl {
+        right: 15%;
+        background: linear-gradient(135deg, #4a90e2, #87ceeb);
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+      }
+
+      @keyframes characterFloat {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      /* Floating particles */
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #d4af37;
+        border-radius: 50%;
+        animation: floatUp 6s linear infinite;
+        opacity: 0.7;
+      }
+
+      @keyframes floatUp {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.7;
+        }
+        90% {
+          opacity: 0.7;
+        }
+        100% {
+          transform: translateY(-100px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Game Screen Styles */
+      #gameContainer {
+        background: #0a0a0a;
+        color: #d4af37;
+        font-family: "MedievalSharp", cursive;
+      }
+
+      #gameHeader {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border-bottom: 3px solid #d4af37;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      }
+
+      #gameHeader h1 {
+        color: #d4af37;
+        font-size: 1.8em;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      #gameInfo {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+        color: #d4af37;
+        font-size: 1.1em;
+      }
+
+      #gameInfo > div {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 8px 15px;
+        border-radius: 5px;
+        border: 1px solid #8b7355;
+      }
+
+      #scoreInfo {
+        display: flex;
+        gap: 20px;
+      }
+
+      #fireboyScore {
+        color: #ff6b35;
+        font-weight: bold;
+      }
+
+      #watergirlScore {
+        color: #4a90e2;
+        font-weight: bold;
+      }
+
+      #gameArea {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 120px);
+        background: linear-gradient(135deg, #1a0f0a, #2a1810);
+        overflow: hidden;
+      }
+
+      #gameCanvas {
+        display: block;
+        background: url('assets/lvl3bg.png') no-repeat center center;
+        background-size: cover;
+        border: 2px solid #d4af37;
+        box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+        width: 1000px;
+        height: 600px;
+        position: relative;
+        margin: 0;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+      }
+
+      #gameUI {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        border: 2px solid #d4af37;
+        border-radius: 10px;
+        padding: 15px;
+        max-width: 300px;
+        font-size: 0.9em;
+      }
+
+      #controlsHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      #gameUI h3 {
+        color: #d4af37;
+        margin: 0;
+        font-size: 1.2em;
+      }
+
+      .toggle-btn {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .toggle-btn:hover {
+        background: linear-gradient(135deg, #4a2818, #6a3828);
+        transform: scale(1.1);
+      }
+
+      .controls-content {
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+
+      .controls-content.hidden {
+        max-height: 0;
+        opacity: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      #gameUI p {
+        margin: 5px 0;
+        color: #8b7355;
+        line-height: 1.4;
+      }
+
+      #gameUI strong {
+        color: #d4af37;
+      }
+
+      #objectiveText {
+        color: #ff6b35;
+        font-weight: bold;
+      }
+
+      .player-controls {
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 5px;
+        border: 1px solid #8b7355;
+      }
+
+      .player-title {
+        margin: 0 0 10px 0;
+        font-size: 1.1em;
+      }
+
+      .fireboy-title {
+        color: #ff6b35;
+      }
+
+      .watergirl-title {
+        color: #4a90e2;
+      }
+
+      .control-group {
+        margin: 8px 0;
+      }
+
+      .control-label {
+        font-size: 0.9em;
+        color: #8b7355;
+        margin-bottom: 5px;
+      }
+
+      .keyboard-keys {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .key-row {
+        display: flex;
+        justify-content: center;
+        gap: 3px;
+      }
+
+      .key {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 1px solid #d4af37;
+        color: #d4af37;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 0.8em;
+        min-width: 25px;
+        text-align: center;
+        font-family: "MedievalSharp", cursive;
+      }
+
+      .game-info {
+        margin-top: 15px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 5px;
+        border: 1px solid #8b7355;
+      }
+
+      #gameControls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+      }
+
+      /* Hide game controls on main menu */
+      #mainMenu #gameControls {
+        display: none;
+      }
+
+      #gameControls button {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        padding: 10px 20px;
+        font-size: 1em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      #gameControls button:hover {
+        background: linear-gradient(135deg, #4a2818, #6a3828);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+      }
+
+      #gameControls button:active {
+        transform: translateY(0);
+      }
+
+      #gameOverScreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        font-family: "MedievalSharp", cursive;
+      }
+
+      #gameOverContent {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 3px solid #d4af37;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5),
+          0 10px 30px rgba(0, 0, 0, 0.8);
+      }
+
+      #gameOverTitle {
+        color: #d4af37;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      #gameOverMessage {
+        color: #8b7355;
+        font-size: 1.3em;
+        margin-bottom: 30px;
+      }
+
+      #restartBtn {
+        background: linear-gradient(135deg, #1a0f0a, #2a1810);
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        padding: 12px 25px;
+        font-size: 1.1em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 5px;
+      }
+
+      #restartBtn:hover {
+        background: linear-gradient(135deg, #2a1810, #3a2420);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+      }
+
+      .game-over-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 250px;
+        margin: 0 auto;
+      }
+
+      .game-over-buttons button {
+        background: linear-gradient(135deg, #1a0f0a, #2a1810);
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        padding: 12px 25px;
+        font-size: 1.1em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 5px;
+      }
+
+      .game-over-buttons button:hover {
+        background: linear-gradient(135deg, #2a1810, #3a2420);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+      }
+
+      .game-over-buttons button:active {
+        transform: translateY(0);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* Pause Menu Styles */
+      #pauseMenu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        font-family: "MedievalSharp", cursive;
+      }
+
+      #pauseContent {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 3px solid #d4af37;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5),
+          0 10px 30px rgba(0, 0, 0, 0.8);
+        animation: pauseSlideIn 0.3s ease-out;
+      }
+
+      @keyframes pauseSlideIn {
+        from {
+          opacity: 0;
+          transform: scale(0.8) translateY(-50px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      #pauseContent h2 {
+        color: #d4af37;
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        letter-spacing: 2px;
+      }
+
+      .pause-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 250px;
+      }
+
+      .pause-btn {
+        background: linear-gradient(135deg, #1a0f0a, #2a1810);
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        padding: 12px 25px;
+        font-size: 1.1em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 5px;
+      }
+
+      .pause-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(212, 175, 55, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .pause-btn:hover::before {
+        left: 100%;
+      }
+
+      .pause-btn:hover {
+        background: linear-gradient(135deg, #2a1810, #3a2420);
+        transform: translateY(-2px);
+        box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.1),
+          0 5px 15px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+      }
+
+      .pause-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Victory Overlay Styles */
+      .victory-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        font-family: "MedievalSharp", cursive;
+      }
+
+      .victory-content {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 3px solid #d4af37;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5),
+          0 10px 30px rgba(0, 0, 0, 0.8);
+        animation: victorySlideIn 0.5s ease-out;
+      }
+
+      @keyframes victorySlideIn {
+        from {
+          opacity: 0;
+          transform: scale(0.8) translateY(-50px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .victory-content h2 {
+        color: #d4af37;
+        font-size: 3em;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        letter-spacing: 3px;
+        animation: victoryGlow 2s ease-in-out infinite;
+      }
+
+      .victory-message {
+        margin-bottom: 30px;
+        max-width: 600px;
+        text-align: center;
+      }
+
+      .victory-message p {
+        color: #8b7355;
+        font-size: 1.1em;
+        line-height: 1.6;
+        margin: 15px 0;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+      }
+
+      .victory-message p:first-child {
+        color: #d4af37;
+        font-weight: bold;
+      }
+
+      @keyframes victoryGlow {
+        0%, 100% {
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px #d4af37;
+        }
+        50% {
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 40px #ffd700, 0 0 60px #ffd700;
+        }
+      }
+
+      .victory-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 300px;
+        align-items: center;
+        margin: 0 auto;
+      }
+
+      .victory-buttons .menu-btn {
+        min-width: 250px;
+        font-size: 1.2em;
+        padding: 15px 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="screen">
+      <div class="dungeon-bg"></div>
+
+      <!-- Torches -->
+      <div class="torch torch-left">
+        <div class="flame"></div>
+        <div class="torch-holder"></div>
+      </div>
+      <div class="torch torch-right">
+        <div class="flame"></div>
+        <div class="torch-holder"></div>
+      </div>
+
+      <div class="main-container">
+        <div class="game-title">
+          <h1 class="title-main">FIREBOY vs WATERGIRL</h1>
+          <p class="title-sub">LEVEL 3 - FINAL BATTLE</p>
+        </div>
+
+        <div class="menu-buttons">
+          <button class="menu-btn" onclick="startGame()">
+            Start Level 3
+          </button>
+          <button class="menu-btn" onclick="selectMap()">Select Map</button>
+
+          <button class="menu-btn" onclick="showInstructions()">
+            How to Play
+          </button>
+          <button class="menu-btn" onclick="showLeaderboard()">
+            Leaderboard
+          </button>
+        </div>
+
+        <div class="bottom-buttons">
+          <button class="small-btn" onclick="showSettings()">Settings</button>
+          <button class="small-btn" onclick="showCredits()">Credits</button>
+        </div>
+      </div>
+
+      <div class="characters">
+        <div class="character fireboy"></div>
+        <div class="character watergirl"></div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameContainer" class="screen hidden">
+      <div id="gameHeader">
+        <h1>Fireboy vs Watergirl - Level 3</h1>
+        <div id="gameInfo">
+          <div id="levelInfo">Level: <span id="currentLevel">3</span></div>
+          <div id="modeInfo">
+            Mode: <span id="currentMode">Boss Battle</span>
+          </div>
+          <div id="scoreInfo">
+            <span id="fireboyScore">Fireboy: 0</span>
+            <span id="watergirlScore">Watergirl: 0</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="gameArea">
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        <div id="gameUI">
+          <div id="controlsHeader">
+            <h3>Controls:</h3>
+            <button id="toggleControls" class="toggle-btn">−</button>
+          </div>
+          <div id="instructions" class="controls-content">
+
+            <!-- Fireboy Controls -->
+            <div class="player-controls">
+              <h4 class="player-title fireboy-title">🔥 Fireboy</h4>
+              <div class="control-group">
+                <div class="control-label">Movement</div>
+                <div class="keyboard-keys">
+                  <div class="key-row">
+                    <div class="key key-w">W</div>
+                  </div>
+                  <div class="key-row">
+                    <div class="key key-a">A</div>
+                    <div class="key key-s">S</div>
+                    <div class="key key-d">D</div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Attack</div>
+                <div class="keyboard-keys">
+                  <div class="key key-space">Space</div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Defense</div>
+                <div class="keyboard-keys">
+                  <div class="key key-q">Q</div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Ultimate</div>
+                <div class="keyboard-keys">
+                  <div class="key key-e">E</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Watergirl Controls -->
+            <div class="player-controls">
+              <h4 class="player-title watergirl-title">💧 Watergirl</h4>
+              <div class="control-group">
+                <div class="control-label">Movement</div>
+                <div class="keyboard-keys">
+                  <div class="key-row">
+                    <div class="key key-up">↑</div>
+                  </div>
+                  <div class="key-row">
+                    <div class="key key-left">←</div>
+                    <div class="key key-down">↓</div>
+                    <div class="key key-right">→</div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Attack</div>
+                <div class="keyboard-keys">
+                  <div class="key key-enter">Enter</div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Defense</div>
+                <div class="keyboard-keys">
+                  <div class="key key-p">P</div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Ultimate</div>
+                <div class="keyboard-keys">
+                  <div class="key key-o">O</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="game-info">
+              <p>
+                <strong>Defense:</strong> Press Q/P to create a thin barrier
+                that blocks projectiles for 3 seconds. 7s cooldown!
+              </p>
+              <p>
+                <strong>Objective:</strong>
+                <span id="objectiveText">Work together to defeat the boss!</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div id="gameControls">
+        <button id="startBtn">Start Game</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset Level</button>
+        <button id="nextLevelBtn" style="display: none">Next Level</button>
+      </div>
+
+      <div id="gameOverScreen" class="hidden">
+        <div id="gameOverContent">
+          <h2 id="gameOverTitle">Game Over</h2>
+          <p id="gameOverMessage">Fireboy Wins!</p>
+          <div class="game-over-buttons">
+            <button id="restartBtn">Restart Level</button>
+            <button id="mainMenuFromGameOverBtn">Main Menu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Victory Overlay -->
+      <div id="victoryOverlay" class="victory-overlay hidden">
+        <div class="victory-content">
+          <h2 id="victoryWinner">VICTORY!</h2>
+          <div id="victoryMessage" class="victory-message">
+            <p>From bitter rivals to trusted allies, Fireboy and Watergirl have learned that true strength comes from unity. Together, they have defeated the mighty boss and proven that cooperation triumphs over conflict.</p>
+            <p>Their journey from enemies to friends shows that even the greatest differences can be overcome when we work together toward a common goal.</p>
+          </div>
+          <div class="victory-buttons">
+            <button id="returnToMainMenuFromVictoryBtn" class="menu-btn">
+              Main Menu
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause Menu -->
+      <div id="pauseMenu" class="hidden">
+        <div id="pauseContent">
+          <h2>Game Paused</h2>
+          <div class="pause-buttons">
+            <button id="resumeBtn" class="pause-btn">Resume Game</button>
+            <button id="restartPauseBtn" class="pause-btn">
+              Restart Level
+            </button>
+            <button id="mainMenuBtn" class="pause-btn">Main Menu</button>
+            <button id="settingsPauseBtn" class="pause-btn">Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="settings.js"></script>
+    <script src="pointSystem.js"></script>
+    <script src="game.js"></script>
+
+    <script>
+      // Main Menu Functions
+      function createParticle() {
+        const particle = document.createElement("div");
+        particle.className = "particle";
+        particle.style.left = Math.random() * window.innerWidth + "px";
+        particle.style.animationDelay = Math.random() * 4 + "s";
+        particle.style.animationDuration = 4 + Math.random() * 2 + "s";
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+          particle.remove();
+        }, 6000);
+      }
+
+      // Create particles periodically
+      setInterval(createParticle, 300);
+
+      // Menu functions
+      function startGame() {
+        // Hide main menu and show game
+        document.getElementById("mainMenu").classList.add("hidden");
+        document.getElementById("gameContainer").classList.remove("hidden");
+
+        // Initialize the game if not already initialized
+        if (!window.game) {
+          window.game = new Game();
+        } else {
+          // Reset game state
+          window.game.currentLevel = 3;
+          window.game.fireboyScore = 0;
+          window.game.watergirlScore = 0;
+          window.game.createLevel(window.game.currentLevel);
+          window.game.gameState = "playing";
+        }
+      }
+
+      function selectMap() {
+        // Go to map selection
+        window.location.href = "map-selection.html";
+      }
+
+      function showInstructions() {
+        alert(
+          "CONTROLS:\n\nFireboy:\n• WASD to move\n• Space to shoot fireball\n• Shift for Ultimate (after 5 defenses)\n• Q for Defense Barrier (3s duration, 7s cooldown)\n\nWatergirl:\n• Arrow Keys to move\n• Enter to shoot waterball\n• Shift for Ultimate (after 5 defenses)\n• P for Defense Barrier (3s duration, 7s cooldown)\n\nOBJECTIVE:\n• Collect power-ups and defeat enemies\n• Reach the doors before your opponent!\n• Block enemy projectiles to build ultimate power\n• Use defense barriers strategically!\n\nGAME FEATURES:\n• Door System: Doors spawn every 15-30 seconds\n• Defense System: Block projectiles to gain ultimate abilities\n• Ultimate Attacks: Powerful attacks after 5 successful defenses\n• Defense Barriers: Create temporary shields with Q/P keys\n• Point System: Track your progress and compete!"
+        );
+      }
+
+      function showLeaderboard() {
+        // Try to load scores from localStorage
+        try {
+          const savedProgress = localStorage.getItem("fireboyWatergirlPoints");
+          if (savedProgress) {
+            const data = JSON.parse(savedProgress);
+            alert(
+              `LEADERBOARD\n\n🔥 Fireboy\nTotal Points: ${
+                data.fireboyPoints || 0
+              }\nDoor Wins: ${
+                data.doorWins?.fireboy || 0
+              }\n\n💧 Watergirl\nTotal Points: ${
+                data.watergirlPoints || 0
+              }\nDoor Wins: ${data.doorWins?.watergirl || 0}\n\nTotal Rounds: ${
+                data.totalRounds || 0
+              }`
+            );
+          } else {
+            alert("No scores yet! Play some games first!");
+          }
+        } catch (e) {
+          alert("No scores yet! Play some games first!");
+        }
+      }
+
+      function showSettings() {
+        alert(
+          "SETTINGS\n\nSound: ON ✓\nMusic: ON ✓\nParticles: ON ✓\n\n(Settings menu coming soon!)"
+        );
+      }
+
+      function showCredits() {
+        alert(
+          "FIREBOY VS WATERGIRL\nFinal Battle - Level 3\n\nA competitive twist on the classic game!\n\nCreated with:\n• HTML5 Canvas\n• CSS3 Animations\n• Vanilla JavaScript\n• Enhanced Combat System\n• Door & Defense Mechanics\n• Defense Barriers\n\nThank you for playing!"
+        );
+      }
+
+      // Pause Menu Functions
+      function showPauseMenu() {
+        document.getElementById("pauseMenu").classList.remove("hidden");
+        if (window.game) {
+          window.game.gameState = "paused";
+        }
+      }
+
+      function hidePauseMenu() {
+        document.getElementById("pauseMenu").classList.add("hidden");
+        if (window.game) {
+          window.game.gameState = "playing";
+        }
+      }
+
+      function resumeGame() {
+        hidePauseMenu();
+      }
+
+      function restartFromPause() {
+        hidePauseMenu();
+        if (window.game) {
+          window.game.resetLevel();
+        }
+      }
+
+      function goToMainMenuFromPause() {
+        hidePauseMenu();
+        document.getElementById("gameContainer").classList.add("hidden");
+        document.getElementById("mainMenu").classList.remove("hidden");
+      }
+
+      function showSettingsFromPause() {
+        showSettings();
+      }
+
+      // Toggle controls visibility
+      function toggleControls() {
+        const controlsContent = document.getElementById("instructions");
+        const toggleBtn = document.getElementById("toggleControls");
+        
+        if (controlsContent.classList.contains("hidden")) {
+          controlsContent.classList.remove("hidden");
+          toggleBtn.textContent = "−";
+        } else {
+          controlsContent.classList.add("hidden");
+          toggleBtn.textContent = "+";
+        }
+      }
+
+      // Initialize main menu on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        // Show main menu by default
+        document.getElementById("mainMenu").classList.remove("hidden");
+        document.getElementById("gameContainer").classList.add("hidden");
+
+        // Add pause menu event listeners
+        document
+          .getElementById("pauseBtn")
+          .addEventListener("click", showPauseMenu);
+        document
+          .getElementById("resumeBtn")
+          .addEventListener("click", resumeGame);
+        document
+          .getElementById("restartPauseBtn")
+          .addEventListener("click", restartFromPause);
+        document
+          .getElementById("mainMenuBtn")
+          .addEventListener("click", goToMainMenuFromPause);
+        document
+          .getElementById("settingsPauseBtn")
+          .addEventListener("click", showSettingsFromPause);
+
+        // Victory overlay buttons
+        document
+          .getElementById("returnToMainMenuFromVictoryBtn")
+          .addEventListener("click", () => {
+            window.game.returnToMainMenuFromVictory();
+          });
+
+        // Game over screen buttons
+        document
+          .getElementById("restartBtn")
+          .addEventListener("click", () => {
+            document.getElementById("gameOverScreen").classList.add("hidden");
+            if (window.game) {
+              window.game.resetLevel();
+            }
+          });
+
+        document
+          .getElementById("mainMenuFromGameOverBtn")
+          .addEventListener("click", () => {
+            document.getElementById("gameOverScreen").classList.add("hidden");
+            document.getElementById("gameContainer").classList.add("hidden");
+            document.getElementById("mainMenu").classList.remove("hidden");
+          });
+
+        // Toggle controls functionality
+        document
+          .getElementById("toggleControls")
+          .addEventListener("click", toggleControls);
+
+        // Add keyboard shortcut for pause (Escape key)
+        document.addEventListener("keydown", function (event) {
+          if (
+            event.key === "Escape" &&
+            !document
+              .getElementById("mainMenu")
+              .classList.contains("hidden") === false
+          ) {
+            if (
+              document.getElementById("pauseMenu").classList.contains("hidden")
+            ) {
+              showPauseMenu();
+            } else {
+              hidePauseMenu();
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

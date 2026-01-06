@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fireboy vs Watergirl - Level 4: Monster Battle Arena</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Main Menu Styles */
+      @import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
+
+      .screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .screen.hidden {
+        display: none;
+      }
+
+      #mainMenu {
+        font-family: "MedievalSharp", cursive;
+        background: #0a0a0a;
+        color: #d4af37;
+        overflow: hidden;
+        position: relative;
+        background-image: url('assets/last.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      /* Overlay for better text readability */
+      .main-menu-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+      }
+
+      /* Main container */
+      .main-container {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        animation: fadeIn 2s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Title styling */
+      .game-title {
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+      }
+
+      .title-main {
+        font-size: 4em;
+        background: linear-gradient(45deg, #ff6b35, #4a90e2);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px rgba(255, 107, 53, 0.5),
+          0 0 60px rgba(74, 144, 226, 0.5);
+        animation: titleGlow 3s ease-in-out infinite;
+        letter-spacing: 3px;
+      }
+
+      @keyframes titleGlow {
+        0%,
+        100% {
+          filter: brightness(1);
+        }
+        50% {
+          filter: brightness(1.3);
+        }
+      }
+
+      .title-sub {
+        font-size: 1.5em;
+        color: #8b7355;
+        margin-top: 10px;
+        letter-spacing: 5px;
+      }
+
+      /* Menu buttons */
+      .menu-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 300px;
+      }
+
+      .menu-btn {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 3px solid #d4af37;
+        color: #d4af37;
+        padding: 15px 30px;
+        font-size: 1.3em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5),
+          0 5px 15px rgba(0, 0, 0, 0.8);
+      }
+
+      .menu-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(212, 175, 55, 0.3),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .menu-btn:hover::before {
+        left: 100%;
+      }
+
+      .menu-btn:hover {
+        background: linear-gradient(135deg, #4a2818, #6a3828);
+        transform: translateY(-2px);
+        box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.2),
+          0 8px 20px rgba(0, 0, 0, 0.9);
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+      }
+
+      .menu-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Character sprites */
+      .characters {
+        position: absolute;
+        bottom: 10%;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 10%;
+      }
+
+      .character {
+        width: 80px;
+        height: 100px;
+        animation: characterFloat 3s ease-in-out infinite;
+      }
+
+      .character.fireboy {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border-radius: 40% 40% 50% 50%;
+        box-shadow: 0 0 30px #ff6b35;
+        animation-delay: 0s;
+      }
+
+      .character.watergirl {
+        background: linear-gradient(135deg, #4a90e2, #87ceeb);
+        border-radius: 40% 40% 50% 50%;
+        box-shadow: 0 0 30px #4a90e2;
+        animation-delay: 1.5s;
+      }
+
+      @keyframes characterFloat {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      /* Settings and credits */
+      .bottom-buttons {
+        position: absolute;
+        bottom: 20px;
+        display: flex;
+        gap: 20px;
+      }
+
+      .small-btn {
+        background: rgba(42, 24, 16, 0.8);
+        border: 2px solid #8b7355;
+        color: #8b7355;
+        padding: 8px 20px;
+        font-size: 0.9em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .small-btn:hover {
+        background: rgba(74, 40, 24, 0.9);
+        color: #d4af37;
+        border-color: #d4af37;
+      }
+
+      /* Particle effects */
+      .particle {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: #d4af37;
+        pointer-events: none;
+        border-radius: 50%;
+        animation: float-up 4s linear infinite;
+      }
+
+      @keyframes float-up {
+        0% {
+          transform: translateY(100vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100vh) translateX(50px);
+          opacity: 0;
+        }
+      }
+
+      /* Game Container */
+      #gameContainer {
+        background: linear-gradient(135deg, #1a0f0a, #2a1810);
+        height: calc(100vh - 120px);
+        overflow: hidden;
+        background-image: url('assets/last.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      #gameCanvas {
+        display: block;
+        background: transparent;
+        border: 2px solid #d4af37;
+        box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+        width: 1000px;
+        height: 600px;
+        position: relative;
+        margin: 0 auto;
+      }
+
+      #gameUI {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: #d4af37;
+        font-family: "MedievalSharp", cursive;
+        font-size: 18px;
+        z-index: 10;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      #levelInfo {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: #d4af37;
+        font-family: "MedievalSharp", cursive;
+        font-size: 18px;
+        z-index: 10;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      #monsterHealth {
+        position: absolute;
+        top: 60px;
+        left: 20px;
+        color: #ff0000;
+        font-family: "MedievalSharp", cursive;
+        font-size: 16px;
+        z-index: 10;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      #gameControls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+        z-index: 10;
+      }
+
+      .game-btn {
+        background: linear-gradient(145deg, #8B4513, #A0522D);
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        padding: 12px 24px;
+        font-family: "MedievalSharp", cursive;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .game-btn:hover {
+        background: linear-gradient(145deg, #A0522D, #8B4513);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      }
+
+      .game-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Pause Menu Styles */
+      #pauseMenu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        font-family: "MedievalSharp", cursive;
+      }
+
+      #pauseContent {
+        background: linear-gradient(135deg, #2c1810, #4a2818);
+        border: 3px solid #d4af37;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5),
+          0 10px 30px rgba(0, 0, 0, 0.8);
+        animation: pauseSlideIn 0.3s ease-out;
+      }
+
+      @keyframes pauseSlideIn {
+        from {
+          opacity: 0;
+          transform: scale(0.8) translateY(-50px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      #pauseContent h2 {
+        color: #d4af37;
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        letter-spacing: 2px;
+      }
+
+      .pause-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 250px;
+      }
+
+      .pause-btn {
+        background: linear-gradient(135deg, #1a0f0a, #2a1810);
+        border: 2px solid #d4af37;
+        color: #d4af37;
+        padding: 12px 25px;
+        font-size: 1.1em;
+        font-family: "MedievalSharp", cursive;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .pause-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(212, 175, 55, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .pause-btn:hover::before {
+        left: 100%;
+      }
+
+      .pause-btn:hover {
+        background: linear-gradient(135deg, #2a1810, #3a2420);
+        transform: translateY(-2px);
+        box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.1),
+          0 5px 15px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+      }
+
+      .pause-btn:active {
+        transform: translateY(0);
+      }
+
+      #gameOverScreen {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.95);
+        border: 4px solid #d4af37;
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        color: #d4af37;
+        font-family: "MedievalSharp", cursive;
+        z-index: 20;
+        box-shadow: 0 0 40px rgba(212, 175, 55, 0.7);
+        min-width: 400px;
+      }
+
+      #gameOverTitle {
+        font-size: 28px;
+        margin-bottom: 20px;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+      }
+
+      #gameOverMessage {
+        font-size: 20px;
+        margin-bottom: 30px;
+        color: #ffd700;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* Level 4 specific styles */
+      .monster-platform {
+        background: linear-gradient(145deg, #8B0000, #DC143C);
+        border: 2px solid #ff0000;
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      }
+
+      .monster-projectile {
+        background: radial-gradient(circle, #ff0000, #8B0000);
+        border: 2px solid #ff0000;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+      }
+
+      .health-bar {
+        width: 200px;
+        height: 20px;
+        background: #333;
+        border: 2px solid #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 5px 0;
+      }
+
+      .health-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff0000, #ff6600);
+        transition: width 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="screen">
+      <div class="main-menu-overlay"></div>
+
+      <div class="main-container">
+        <div class="game-title">
+          <h1 class="title-main">FIREBOY vs WATERGIRL</h1>
+          <p class="title-sub">LEVEL 4: MONSTER BATTLE ARENA</p>
+        </div>
+
+        <div class="menu-buttons">
+          <button class="menu-btn" id="startGameBtn">
+            Start Monster Battle
+          </button>
+          <button class="menu-btn" id="backToMapBtn">Back to Map</button>
+          <button class="menu-btn" id="showInstructionsBtn">
+            How to Play
+          </button>
+        </div>
+
+        <div class="bottom-buttons">
+          <button class="small-btn" id="showSettingsBtn">Settings</button>
+          <button class="small-btn" id="showCreditsBtn">Credits</button>
+        </div>
+      </div>
+
+      <div class="characters">
+        <div class="character fireboy"></div>
+        <div class="character watergirl"></div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameContainer" class="screen hidden">
+      <div id="gameHeader">
+        <h1>Fireboy vs Watergirl - Level 4</h1>
+        <div id="gameInfo">
+          <div id="levelInfo">Level: <span id="currentLevel">4</span></div>
+          <div id="modeInfo">
+            Mode: <span id="currentMode">Monster Battle</span>
+          </div>
+          <div id="scoreInfo">
+            <span id="fireboyScore">Fireboy: 0</span>
+            <span id="watergirlScore">Watergirl: 0</span>
+          </div>
+          <button id="pauseBtn" class="pause-btn" style="display: none">
+            Pause
+          </button>
+        </div>
+      </div>
+
+      <div id="gameArea">
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        <div id="gameUI">
+          <div id="instructions">
+            <h3>Monster Battle Controls:</h3>
+
+            <!-- Fireboy Controls -->
+            <div class="player-controls">
+              <h4 class="player-title fireboy-title">🔥 Fireboy</h4>
+              <div class="control-group">
+                <div class="control-label">Movement</div>
+                <div class="keyboard-keys">
+                  <div class="key-row">
+                    <div class="key key-w">W</div>
+                  </div>
+                  <div class="key-row">
+                    <div class="key key-a">A</div>
+                    <div class="key key-s">S</div>
+                    <div class="key key-d">D</div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Attack</div>
+                <div class="keyboard-keys">
+                  <div class="key key-space">Space</div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Defense</div>
+                <div class="keyboard-keys">
+                  <div class="key key-q">Q</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Watergirl Controls -->
+            <div class="player-controls">
+              <h4 class="player-title watergirl-title">💧 Watergirl</h4>
+              <div class="control-group">
+                <div class="control-label">Movement</div>
+                <div class="keyboard-keys">
+                  <div class="key-row">
+                    <div class="key key-up">↑</div>
+                  </div>
+                  <div class="key-row">
+                    <div class="key key-left">←</div>
+                    <div class="key key-down">↓</div>
+                    <div class="key key-right">→</div>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Attack</div>
+                <div class="keyboard-keys">
+                  <div class="key key-enter">Enter</div>
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="control-label">Defense</div>
+                <div class="keyboard-keys">
+                  <div class="key key-p">P</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="game-info">
+              <p>
+                <strong>Monster Health:</strong>
+                <div class="health-bar">
+                  <div id="monsterHealthBar" class="health-fill" style="width: 100%;"></div>
+                </div>
+                <span id="monsterHealthText">100/100 HP</span>
+              </p>
+              <p>
+                <strong>Objective:</strong>
+                <span id="objectiveText">Defeat the monster to win!</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="gameControls">
+        <button id="startBtn">Start Game</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset Level</button>
+        <button id="nextLevelBtn" style="display: none">Next Level</button>
+      </div>
+
+      <div id="gameOverScreen" class="hidden">
+        <div id="gameOverContent">
+          <h2 id="gameOverTitle">Game Over</h2>
+          <p id="gameOverMessage">Monster Defeated!</p>
+          <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+            <button id="restartBtn" class="game-btn">Play Again</button>
+            <button id="backToMapBtn2" class="game-btn">Back to Map</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause Menu -->
+      <div id="pauseMenu" class="hidden">
+        <div id="pauseContent">
+          <h2>Game Paused</h2>
+          <div class="pause-buttons">
+            <button id="resumeBtn" class="pause-btn">Resume Game</button>
+            <button id="restartPauseBtn" class="pause-btn">
+              Restart Level
+            </button>
+            <button id="mainMenuBtn" class="pause-btn">Main Menu</button>
+            <button id="settingsPauseBtn" class="pause-btn">Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="settings.js"></script>
+    <script src="pointSystem.js"></script>
+    <script src="game.js"></script>
+    
+    <script>
+      // Level 4 specific game initialization
+      class Level4Game extends Game {
+        constructor() {
+          super();
+          this.currentLevel = 4;
+          this.gameMode = "cooperative";
+          this.width = 1000;
+          this.height = 600;
+          
+          // Level 4 specific settings
+          this.projectileSpeed = 8;
+          this.defenseCooldownTime = 7000; // 7 seconds
+          this.powerUpSpawnRate = 10000; // Every 10 seconds
+          this.enemyAggression = 2.0; // High AI aggression
+          
+          // Monster properties
+          this.monster = {
+            x: 500,
+            y: 100,
+            width: 80,
+            height: 80,
+            health: 100,
+            maxHealth: 100,
+            speed: 1,
+            direction: 1,
+            lastAttack: 0,
+            attackCooldown: 2000, // Attack every 2 seconds
+            projectiles: [],
+            alive: true
+          };
+          
+          // Monster projectile properties
+          this.monsterProjectileSpeed = 6;
+          this.monsterProjectileSize = 12;
+          
+          // Initialize canvas
+          this.canvas.width = this.width;
+          this.canvas.height = this.height;
+          
+          // Load last.png background
+          this.lastBackground = new Image();
+          this.lastBackground.src = 'assets/last.png';
+          this.lastBackground.onload = () => {
+            console.log('Last background loaded successfully');
+          };
+          this.lastBackground.onerror = () => {
+            console.log('Failed to load last background, using fallback');
+          };
+        }
+
+        createLevel(levelNumber) {
+          // Call parent createLevel first to initialize players
+          super.createLevel(levelNumber);
+          
+          // Level 4 specific setup
+          this.setupMonsterBattleLevel();
+        }
+
+        setupMonsterBattleLevel() {
+          // Create battle arena platforms
+          this.platforms = [
+            // Ground platforms
+            { x: 0, y: 580, width: 1000, height: 20, type: 'normal' },
+            
+            // Left side platforms
+            { x: 100, y: 500, width: 150, height: 20, type: 'normal' },
+            { x: 50, y: 400, width: 100, height: 20, type: 'normal' },
+            { x: 150, y: 300, width: 100, height: 20, type: 'normal' },
+            
+            // Right side platforms
+            { x: 750, y: 500, width: 150, height: 20, type: 'normal' },
+            { x: 850, y: 400, width: 100, height: 20, type: 'normal' },
+            { x: 750, y: 300, width: 100, height: 20, type: 'normal' },
+            
+            // Center platforms for monster
+            { x: 400, y: 200, width: 200, height: 20, type: 'monster' },
+            { x: 450, y: 350, width: 100, height: 20, type: 'normal' }
+          ];
+
+          // Reset monster
+          this.monster.health = this.monster.maxHealth;
+          this.monster.alive = true;
+          this.monster.x = 500;
+          this.monster.y = 100;
+          this.monster.projectiles = [];
+          
+          // Spawn initial power-ups
+          this.spawnPowerUp();
+          
+          // Update UI for monster battle mode
+          document.getElementById('objectiveText').textContent = 'Defeat the monster to win!';
+          this.updateMonsterHealthDisplay();
+        }
+
+        update(deltaTime) {
+          super.update(deltaTime);
+          
+          // Level 4 specific updates
+          this.updateMonster(deltaTime);
+          this.updateMonsterProjectiles(deltaTime);
+          this.checkMonsterCollisions();
+        }
+
+        updateMonster(deltaTime) {
+          if (!this.monster.alive) return;
+          
+          // Move monster side to side with some randomness
+          this.monster.x += this.monster.speed * this.monster.direction;
+          
+          // Bounce off walls
+          if (this.monster.x <= 0 || this.monster.x >= this.width - this.monster.width) {
+            this.monster.direction *= -1;
+            // Add some random pause when changing direction
+            this.monster.speed = Math.random() * 2 + 0.5;
+          }
+          
+          // Occasionally change speed for more dynamic movement
+          if (Math.random() < 0.01) {
+            this.monster.speed = Math.random() * 2 + 0.5;
+          }
+          
+          // Attack with projectiles - more frequent when health is low
+          const now = Date.now();
+          const attackDelay = this.monster.health < 30 ? this.monster.attackCooldown * 0.5 : this.monster.attackCooldown;
+          
+          if (now - this.monster.lastAttack > attackDelay) {
+            this.monsterAttack();
+            this.monster.lastAttack = now;
+          }
+        }
+
+        monsterAttack() {
+          if (!this.fireboy || !this.watergirl) return;
+          
+          // Shoot at both players with some spread
+          const targets = [this.fireboy, this.watergirl];
+          
+          targets.forEach(target => {
+            if (target && target.alive) {
+              const dx = target.x - this.monster.x;
+              const dy = target.y - this.monster.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              // Normalize direction
+              const vx = (dx / distance) * this.monsterProjectileSpeed;
+              const vy = (dy / distance) * this.monsterProjectileSpeed;
+              
+              // Add some spread to make it more challenging
+              const spread = 0.3;
+              const spreadVx = vx + (Math.random() - 0.5) * spread;
+              const spreadVy = vy + (Math.random() - 0.5) * spread;
+              
+              this.monster.projectiles.push({
+                x: this.monster.x + this.monster.width / 2,
+                y: this.monster.y + this.monster.height / 2,
+                vx: spreadVx,
+                vy: spreadVy,
+                width: this.monsterProjectileSize,
+                height: this.monsterProjectileSize,
+                type: 'monster'
+              });
+            }
+          });
+          
+          // Occasionally shoot a spread pattern when health is low
+          if (this.monster.health < 50 && Math.random() < 0.3) {
+            for (let i = 0; i < 5; i++) {
+              const angle = (i / 5) * Math.PI * 2;
+              const vx = Math.cos(angle) * this.monsterProjectileSpeed * 0.7;
+              const vy = Math.sin(angle) * this.monsterProjectileSpeed * 0.7;
+              
+              this.monster.projectiles.push({
+                x: this.monster.x + this.monster.width / 2,
+                y: this.monster.y + this.monster.height / 2,
+                vx: vx,
+                vy: vy,
+                width: this.monsterProjectileSize,
+                height: this.monsterProjectileSize,
+                type: 'monster'
+              });
+            }
+          }
+        }
+
+        updateMonsterProjectiles(deltaTime) {
+          this.monster.projectiles.forEach((projectile, index) => {
+            projectile.x += projectile.vx * deltaTime;
+            projectile.y += projectile.vy * deltaTime;
+            
+            // Remove projectiles that are off screen
+            if (projectile.x < 0 || projectile.x > this.width || 
+                projectile.y < 0 || projectile.y > this.height) {
+              this.monster.projectiles.splice(index, 1);
+            }
+          });
+        }
+
+        checkMonsterCollisions() {
+          if (!this.monster.alive) return;
+          
+          // Check if player projectiles hit monster
+          this.projectiles.forEach((projectile, projIndex) => {
+            if (projectile.type === 'fireball' || projectile.type === 'waterball') {
+              if (this.checkCollision(projectile, this.monster)) {
+                // Damage monster
+                this.monster.health -= 5;
+                this.projectiles.splice(projIndex, 1);
+                
+                // Visual effect
+                this.addTextEffect(this.monster.x, this.monster.y - 20, "HIT!", "#ff0000");
+                this.playSound(300, 0.3, "square");
+                
+                // Check if monster is defeated
+                if (this.monster.health <= 0) {
+                  this.monster.alive = false;
+                  this.monster.health = 0;
+                  this.endGame("Monster Defeated! Victory!", "cooperative");
+                }
+                
+                this.updateMonsterHealthDisplay();
+              }
+            }
+          });
+          
+          // Check if monster projectiles hit players
+          this.monster.projectiles.forEach((projectile, projIndex) => {
+            if (this.fireboy && this.fireboy.alive && this.checkCollision(projectile, this.fireboy)) {
+              this.monster.projectiles.splice(projIndex, 1);
+              this.damagePlayer(this.fireboy);
+            }
+            
+            if (this.watergirl && this.watergirl.alive && this.checkCollision(projectile, this.watergirl)) {
+              this.monster.projectiles.splice(projIndex, 1);
+              this.damagePlayer(this.watergirl);
+            }
+          });
+        }
+
+        damagePlayer(player) {
+          // Reduce player health or respawn
+          this.addTextEffect(player.x, player.y - 20, "HIT!", "#ff0000");
+          this.playSound(200, 0.5, "sawtooth");
+          
+          // Respawn player
+          player.x = player.startX;
+          player.y = player.startY;
+          player.velocityX = 0;
+          player.velocityY = 0;
+        }
+
+        updateMonsterHealthDisplay() {
+          const healthPercent = (this.monster.health / this.monster.maxHealth) * 100;
+          document.getElementById('monsterHealthBar').style.width = healthPercent + '%';
+          document.getElementById('monsterHealthText').textContent = 
+            this.monster.health + '/' + this.monster.maxHealth + ' HP';
+        }
+
+        checkWinConditions() {
+          // Monster battle win condition is handled in checkMonsterCollisions
+          // Check if both players are dead (lose condition)
+          if (this.fireboy && !this.fireboy.alive && this.watergirl && !this.watergirl.alive) {
+            this.endGame("Both players defeated! Game Over!", "monster");
+          }
+        }
+
+        endGame(message, winner) {
+          this.gameState = "gameOver";
+          document.getElementById('gameOverMessage').textContent = message;
+          
+          if (winner === "cooperative") {
+            document.getElementById('gameOverTitle').textContent = "🏆 Monster Defeated!";
+            document.getElementById('gameOverMessage').innerHTML = 
+              "Congratulations! You have successfully defeated the monster!<br>" +
+              "Both Fireboy and Watergirl worked together to achieve victory!<br>" +
+              "<strong>Bonus Points: +200</strong>";
+          } else {
+            document.getElementById('gameOverTitle').textContent = "💀 Game Over";
+            document.getElementById('gameOverMessage').innerHTML = 
+              "The monster was too powerful!<br>" +
+              "Try again and work together to defeat it!";
+          }
+          
+          // Show appropriate buttons
+          document.getElementById('restartBtn').style.display = 'inline-block';
+          document.getElementById('nextLevelBtn').style.display = 'none';
+          
+          document.getElementById('gameOverScreen').classList.remove('hidden');
+          
+          // Add victory effects
+          if (winner === "cooperative") {
+            this.addVictoryEffects();
+          }
+          
+          // Update points system
+          if (window.updatePoints && winner === "cooperative") {
+            window.updatePoints("cooperative", 200); // Bonus points for defeating monster
+          }
+          
+          // Unlock next level
+          if (window.unlockNextLevel && winner === "cooperative") {
+            window.unlockNextLevel(4, 3); // 3 stars for completing level 4
+          }
+        }
+        
+        addVictoryEffects() {
+          // Add confetti-like effects
+          for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+              this.addTextEffect(
+                Math.random() * this.width, 
+                Math.random() * this.height, 
+                "VICTORY!", 
+                "#ffd700"
+              );
+            }, i * 100);
+          }
+        }
+
+        resetLevel() {
+          super.resetLevel();
+          this.setupMonsterBattleLevel();
+        }
+
+        drawBackground() {
+          // Use last.png background image
+          if (this.lastBackground.complete && this.lastBackground.naturalWidth > 0) {
+            // Draw the last background image
+            this.ctx.drawImage(this.lastBackground, 0, 0, this.width, this.height);
+            console.log('Drawing last background image');
+          } else {
+            // Fallback monster battle background
+            const gradient = this.ctx.createLinearGradient(0, 0, 0, this.height);
+            gradient.addColorStop(0, '#8B0000'); // Dark red at top
+            gradient.addColorStop(0.3, '#DC143C'); // Crimson
+            gradient.addColorStop(0.7, '#B22222'); // Fire brick
+            gradient.addColorStop(1, '#2F0000'); // Very dark red at bottom
+            
+            this.ctx.fillStyle = gradient;
+            this.ctx.fillRect(0, 0, this.width, this.height);
+            
+            // Add battle atmosphere effects
+            this.ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
+            for (let i = 0; i < 15; i++) {
+              const x = Math.random() * this.width;
+              const y = Math.random() * this.height;
+              const size = Math.random() * 20 + 10;
+              this.ctx.beginPath();
+              this.ctx.arc(x, y, size, 0, Math.PI * 2);
+              this.ctx.fill();
+            }
+          }
+        }
+
+        render() {
+          super.render();
+          
+          // Level 4 specific rendering
+          this.drawMonster();
+          this.drawMonsterProjectiles();
+        }
+
+        drawMonster() {
+          if (!this.monster.alive) return;
+          
+          // Add pulsing effect when health is low
+          const pulse = this.monster.health < 30 ? Math.sin(Date.now() * 0.01) * 0.1 + 1 : 1;
+          const scaledWidth = this.monster.width * pulse;
+          const scaledHeight = this.monster.height * pulse;
+          const offsetX = (this.monster.width - scaledWidth) / 2;
+          const offsetY = (this.monster.height - scaledHeight) / 2;
+          
+          // Draw monster shadow
+          this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+          this.ctx.fillRect(this.monster.x + 5, this.monster.y + 5, scaledWidth, scaledHeight);
+          
+          // Draw monster body with gradient
+          const gradient = this.ctx.createLinearGradient(
+            this.monster.x, this.monster.y, 
+            this.monster.x + scaledWidth, this.monster.y + scaledHeight
+          );
+          gradient.addColorStop(0, '#8B0000');
+          gradient.addColorStop(0.5, '#DC143C');
+          gradient.addColorStop(1, '#8B0000');
+          
+          this.ctx.fillStyle = gradient;
+          this.ctx.fillRect(this.monster.x + offsetX, this.monster.y + offsetY, scaledWidth, scaledHeight);
+          
+          // Draw monster details
+          this.ctx.fillStyle = '#ff0000';
+          this.ctx.fillRect(this.monster.x + 10 + offsetX, this.monster.y + 10 + offsetY, 20, 20); // Left eye
+          this.ctx.fillRect(this.monster.x + 50 + offsetX, this.monster.y + 10 + offsetY, 20, 20); // Right eye
+          
+          // Draw monster mouth
+          this.ctx.fillStyle = '#000000';
+          this.ctx.fillRect(this.monster.x + 20 + offsetX, this.monster.y + 50 + offsetY, 40, 20);
+          
+          // Draw monster horns
+          this.ctx.fillStyle = '#4B0000';
+          this.ctx.fillRect(this.monster.x + 15 + offsetX, this.monster.y - 10 + offsetY, 8, 15);
+          this.ctx.fillRect(this.monster.x + 57 + offsetX, this.monster.y - 10 + offsetY, 8, 15);
+          
+          // Draw health bar above monster
+          this.ctx.fillStyle = '#333';
+          this.ctx.fillRect(this.monster.x - 10, this.monster.y - 30, this.monster.width + 20, 10);
+          
+          // Health bar with gradient
+          const healthGradient = this.ctx.createLinearGradient(
+            this.monster.x - 10, this.monster.y - 30,
+            this.monster.x + this.monster.width + 10, this.monster.y - 30
+          );
+          healthGradient.addColorStop(0, '#ff0000');
+          healthGradient.addColorStop(0.5, '#ffff00');
+          healthGradient.addColorStop(1, '#00ff00');
+          
+          this.ctx.fillStyle = healthGradient;
+          const healthPercent = this.monster.health / this.monster.maxHealth;
+          this.ctx.fillRect(this.monster.x - 10, this.monster.y - 30, 
+                           (this.monster.width + 20) * healthPercent, 10);
+          
+          // Health bar border
+          this.ctx.strokeStyle = '#fff';
+          this.ctx.lineWidth = 2;
+          this.ctx.strokeRect(this.monster.x - 10, this.monster.y - 30, this.monster.width + 20, 10);
+        }
+
+        drawMonsterProjectiles() {
+          this.monster.projectiles.forEach(projectile => {
+            // Create gradient for projectile
+            const gradient = this.ctx.createRadialGradient(
+              projectile.x + projectile.width/2, projectile.y + projectile.height/2, 0,
+              projectile.x + projectile.width/2, projectile.y + projectile.height/2, projectile.width/2
+            );
+            gradient.addColorStop(0, '#ff0000');
+            gradient.addColorStop(0.7, '#8B0000');
+            gradient.addColorStop(1, '#4B0000');
+            
+            this.ctx.fillStyle = gradient;
+            this.ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+            
+            // Add glow effect
+            this.ctx.shadowColor = '#ff0000';
+            this.ctx.shadowBlur = 15;
+            this.ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+            this.ctx.shadowBlur = 0;
+            
+            // Add trail effect
+            this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+            this.ctx.fillRect(projectile.x - projectile.vx * 5, projectile.y - projectile.vy * 5, 
+                            projectile.width * 0.7, projectile.height * 0.7);
+          });
+        }
+      }
+
+      // Initialize the game when the page loads
+      let game;
+      window.addEventListener('load', () => {
+        game = new Level4Game();
+        
+        // Hide main menu and show game directly
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('gameContainer').classList.remove('hidden');
+        
+        // Initialize the game properly
+        game.createLevel(4);
+        game.startGame();
+        
+        // Start the game loop
+        if (!game.gameLoop) {
+          game.gameLoop = setInterval(() => {
+            if (game.gameState === 'playing') {
+              const currentTime = Date.now();
+              const deltaTime = Math.min((currentTime - game.lastTime) / 1000, game.maxDeltaTime);
+              game.lastTime = currentTime;
+              game.update(deltaTime);
+              game.render();
+            }
+          }, 1000 / 60); // 60 FPS
+        }
+        
+        // Set up button event listeners
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+          document.getElementById('mainMenu').classList.add('hidden');
+          document.getElementById('gameContainer').classList.remove('hidden');
+          
+          // Initialize the game properly
+          game.createLevel(4);
+          game.startGame();
+          
+          // Start the game loop
+          if (!game.gameLoop) {
+            game.gameLoop = setInterval(() => {
+              if (game.gameState === 'playing') {
+                const currentTime = Date.now();
+                const deltaTime = Math.min((currentTime - game.lastTime) / 1000, game.maxDeltaTime);
+                game.lastTime = currentTime;
+                game.update(deltaTime);
+                game.render();
+              }
+            }, 1000 / 60); // 60 FPS
+          }
+        });
+        
+        document.getElementById('backToMapBtn').addEventListener('click', () => {
+          window.location.href = 'map-selection.html';
+        });
+        
+        document.getElementById('showInstructionsBtn').addEventListener('click', () => {
+          window.location.href = 'how-to-play.html';
+        });
+        
+        document.getElementById('backToMapBtn2').addEventListener('click', () => {
+          window.location.href = 'map-selection.html';
+        });
+        
+        document.getElementById('startBtn').addEventListener('click', () => {
+          game.startGame();
+          
+          // Start the game loop if not already running
+          if (!game.gameLoop) {
+            game.gameLoop = setInterval(() => {
+              if (game.gameState === 'playing') {
+                const currentTime = Date.now();
+                const deltaTime = Math.min((currentTime - game.lastTime) / 1000, game.maxDeltaTime);
+                game.lastTime = currentTime;
+                game.update(deltaTime);
+                game.render();
+              }
+            }, 1000 / 60); // 60 FPS
+          }
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+          game.pauseGame();
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+          game.resetLevel();
+        });
+        
+        document.getElementById('resumeBtn').addEventListener('click', () => {
+          game.resumeGame();
+        });
+        
+        document.getElementById('restartPauseBtn').addEventListener('click', () => {
+          game.resetLevel();
+          game.hidePauseMenu();
+        });
+        
+        document.getElementById('mainMenuBtn').addEventListener('click', () => {
+          window.location.href = 'main-menu.html';
+        });
+        
+        document.getElementById('restartBtn').addEventListener('click', () => {
+          game.resetLevel();
+          document.getElementById('gameOverScreen').classList.add('hidden');
+        });
+      });
+    </script>
+  </body>
+</html>
